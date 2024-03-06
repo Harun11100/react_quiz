@@ -18,7 +18,7 @@ function Timer({dispatch,remainingTime}) {
       
      
       return (
-          <p className="timer">{minutes}:{seconds} {remainingTime}</p>
+          <p className="timer">{minutes<10 &&"0"}{minutes}:{seconds<10&&"0"}{seconds}</p>
       )
 }
 
