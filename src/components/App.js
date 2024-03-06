@@ -8,16 +8,19 @@
  import Question from "./Question.js"
  import NextButton from "./NextButton.js"
  import Progres from "./Progres.js"
-import Finish from "./Finish.js"
+ import Finish from "./Finish.js"
+ import Footer from "./Footer.js"
+ import Timer from "./Timer.js"
 
 
+ const SECS_PER_QUESTION=30
 
  function reduce(state,action){
 
  switch(action.type){
  case 'dataReceived':
   return {...state,questions:action.payload,
-    status:"ready"
+    status:"ready",
          
   }
   case 'dataFailed':
@@ -27,7 +30,7 @@ import Finish from "./Finish.js"
 
   case "start"  :
     return{
-      ...state,status:'active'
+      ...state,status:'active' ,remainingTime:state.questions.length*SECS_PER_QUESTION
     }
     case"newAnswer" :
     const ques=state.questions.at(state.index)
@@ -48,6 +51,11 @@ import Finish from "./Finish.js"
     return{
       ...state ,status:"ready",points:0 ,index:0,answer:null
     }
+    case"tick_tock":
+    return{
+      ...state,remainingTime:state.remainingTime-1,
+      status:state.remainingTime===0? "finished":state.status, highscore:state.points
+    }
      
     
  default:
@@ -64,12 +72,13 @@ import Finish from "./Finish.js"
    index:0,
    answer:null,
    points:0,
-   highscore:0
+   highscore:0,
+   remainingTime:null
 
  }
  export default function App(){
 
-  const[{questions,status,index,answer,points,highscore},dispatch]=useReducer(reduce,initialstate)
+  const[{questions,status,index,answer,points,highscore,remainingTime},dispatch]=useReducer(reduce,initialstate)
   const numQuestion=questions.length
 
   const maxPossiblePoints=questions.reduce((prev,current)=>prev+current.points,0)
@@ -109,10 +118,13 @@ import Finish from "./Finish.js"
     <Question 
     question={questions[index]} 
     index ={index} 
-    answer={answer} 
-
+    answer={answer}
     dispatch={dispatch}/>
+   <Footer>
+    <Timer dispatch={dispatch} remainingTime={remainingTime}/>
     <NextButton  index={index} numQuestions={numQuestion} dispatch={dispatch}answer={answer}/>
+   </Footer>
+    
     </>}
      {status==="finished" && <Finish dispatch={dispatch} highscore={highscore} points={points} maxPossiblePoints={maxPossiblePoints}/>}
   </Main>
